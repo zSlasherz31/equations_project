@@ -66,8 +66,6 @@ def root(s, a, b):
     while b - a > eps:
         x = a
         y1 = eval(s)
-        x = b
-        y2 = eval(s)
         c = (a + b) / 2
         x = c
         y3 = eval(s)
@@ -78,55 +76,36 @@ def root(s, a, b):
     return round((a + b) / 2, 4)
 
 
-def solve(s):
+def solve(s_x):
     """Находит отрезки с корнями."""
     h, x1, final_roots = 1, -10000, ''
     while x1 <= 10000:
         x = x1
-        y1 = eval(s)
+        y1 = eval(s_x)
         x = x1 + h
-        y2 = eval(s)
+        y2 = eval(s_x)
         if y1 * y2 < 0:
-            final_roots += f'x ≈ {str(root(s, x1, x1 + h))}\n'
+            final_roots += f'x ≈ {str(root(s_x, x1, x1 + h))}\n'
         x1 += h
     return final_roots
 
 
 def check(_event):  # В качестве аргумента можно ввести что угодно, но _event не выдаёт предупреждение.
-    """Проверяет на правильность ввода и выводит ошибку/ошибки, либо найденные корни."""
-    s = entry1.get().replace('^', '**')
-    check_correct, check_correct_zero = 0, 0
-    if s.count('/0') > 0:
-        check_correct_zero += 1
-    if 0 <= len(s) <= 5 or s[-1] in '-+/*^' or s.count('--' or '++' or '****' or '**x' or '**X' or 'xx') > 0:
-        check_correct += 1
-    else:
-        for elem in s:
-            if elem in r'''abcdefghijklmnopqrstuvwyzABCDEFGHIJKLMNOPQRSTUVWXYZ
-                        абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ
-                        _!'"@№#$%;:&?=,.<>~`\|''':
-                check_correct += 1
-    if check_correct != 0 and check_correct_zero != 0:
+    """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни."""
+    main_s = entry1.get().replace('^', '**')
+    try:
+        final_solve = solve(main_s)
+        if final_solve.count('x') > 1:
+            label_roots.config(text=f'Корни вашего уравнения:\n{final_solve}')
+        elif final_solve.count('x') == 1:
+            label_roots.config(text=f'Корень вашего уравнения:\n{final_solve}')
+        else:
+            label_roots.config(text='Данное уравнение не имеет действительных корней')
+    except (ZeroDivisionError, NameError, SyntaxError):
         label_roots.config(text='')
         mb.showerror('Ошибка ввода', '''Возможно следует дописать уравнение, либо исключить
 русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), ДЕЛЕНИЕ
 на 0, возведение в степень «x» или же повторяющиеся символы''')
-    elif check_correct != 0:
-        label_roots.config(text='')
-        mb.showerror('Ошибка ввода', '''Возможно следует дописать уравнение, либо исключить
-русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), возведение 
-в степень «x» или же повторяющиеся символы''')
-    elif check_correct_zero != 0:
-        label_roots.config(text='')
-        mb.showerror('Ошибка ввода', 'Делить на ноль нельзя!')
-    else:
-        final_solve = solve(s)
-        if final_solve.count('x') == 1:
-            label_roots.config(text=f'Корень вашего уравнения:\n{final_solve}')
-        elif final_solve.count('x') > 1:
-            label_roots.config(text=f'Корни вашего уравнения:\n{final_solve}')
-        else:
-            label_roots.config(text='Данное уравнение не имеет действительных корней')
 
 
 # Главное окно
