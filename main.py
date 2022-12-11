@@ -22,16 +22,15 @@ def hide_temp_text(_event):
 def instr(_event):
     """Открывает/закрывает окно с инструкцией ввода."""
     # Дочернее окно
-
     win_instr = tk.Toplevel()
     win_instr.bell()  # Проигрывает дефолтный звук windows, поведение меняется его изменением в windows
-    w, h = 530, 250
-    win_instr.geometry(f'{w}x{h}+{(win.winfo_width() - w) // 2}+{(win.winfo_height() - h) // 2}')
+    win_instr.geometry(f'530x250+{win.winfo_rootx()}+{win.winfo_rooty()}')
     win_instr.config(bg='black')
     win_instr.title('Инструкция')
     win_instr.resizable(False, False)
+    win_instr.transient(win)
 
-    # Виджет в новом окне с инструкцией (в переменную не сохраняется)
+    # Виджет с инструкцией
 
     tk.Label(win_instr, text='''Как решить уравнение:
     1. Нажать на поле ввода (надпись «Введите уравнение...»).
@@ -48,6 +47,7 @@ def instr(_event):
 Это окно можно перетаскивать.''', bg='black', fg='purple',
              font=('Calibri', 11),
              justify=tk.LEFT).pack()
+    win_instr.after(60000, lambda: win_instr.destroy())
 
 
 def neon_gif_update(indx):
@@ -95,26 +95,31 @@ def check(_event):  # В качестве аргумента можно ввес
     main_s = entry1.get().replace('^', '**')
     try:
         final_solve = solve(main_s)
+    except (ZeroDivisionError, NameError, SyntaxError):
+        button_solve.config(image=incor_btn_slv_photo)
+        label_roots.config(text='')
+        mb.showerror('Ошибка ввода', '''Возможно следует дописать уравнение, либо исключить
+русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), ДЕЛЕНИЕ
+на 0, возведение в степень «x» или же повторяющиеся символы''')
+        button_solve.config(image=default_btn_slv_photo)
+    else:
+        button_solve.config(image=cor_btn_slv_photo)
         if final_solve.count('x') > 1:
             label_roots.config(text=f'Корни вашего уравнения:\n{final_solve}')
         elif final_solve.count('x') == 1:
             label_roots.config(text=f'Корень вашего уравнения:\n{final_solve}')
         else:
             label_roots.config(text='Данное уравнение не имеет действительных корней')
-    except (ZeroDivisionError, NameError, SyntaxError):
-        label_roots.config(text='')
-        mb.showerror('Ошибка ввода', '''Возможно следует дописать уравнение, либо исключить
-русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), ДЕЛЕНИЕ
-на 0, возведение в степень «x» или же повторяющиеся символы''')
+        win.after(4000, lambda: button_solve.config(image=default_btn_slv_photo))
 
 
 # Главное окно
 win = tk.Tk()
-main_photo = tk.PhotoImage(file='resources/ico_photo.png')
+main_photo = tk.PhotoImage(file='resources/ico_image.png')
 win.iconphoto(True, main_photo)
 win.title('Equations')
 win.state('zoomed')
-win.minsize(884, 878)
+win.minsize(875, 855)
 win.config(bg='black')
 win.protocol('WM_DELETE_WINDOW', on_exit)
 
@@ -122,10 +127,9 @@ win.protocol('WM_DELETE_WINDOW', on_exit)
 # (по умолчанию tk.TOP - константа), либо 'anchor='); файл с функционалом .pack() оставлю в проекте с задачами
 # Кнопка помощи.
 
-button_help = tk.Button(win, text='Инструкция(показать/скрыть)', font=('Calibri', 11),
-                        bg='black', fg='purple', relief=tk.SOLID,
-                        activeforeground='purple',
-                        activebackground='black')
+button_help_photo = tk.PhotoImage(file='resources/instr_image.png')
+button_help = tk.Button(win, image=button_help_photo, background='black',
+                        borderwidth=0, activebackground='black')
 button_help.pack(anchor=tk.NW)
 
 # Поле ввода.
@@ -139,10 +143,11 @@ entry1.pack(pady=30)
 
 # Кнопка решения уравнения.
 
-button_solve = tk.Button(win, text='Решить уравнение', bg='black', fg='purple',
-                         font=('Segoe UI Variable Text Light', 20),
-                         activeforeground='purple',
-                         activebackground='black')
+default_btn_slv_photo = tk.PhotoImage(file='resources/default_btn_slv_image.png')
+incor_btn_slv_photo = tk.PhotoImage(file='resources/incor_btn_slv_image.png')
+cor_btn_slv_photo = tk.PhotoImage(file='resources/cor_btn_slv_image.png')
+button_solve = tk.Button(win, image=default_btn_slv_photo, background='black',
+                         borderwidth=0, activebackground='black')
 button_solve.pack(pady=30)
 
 # Виджет неонового GIFa.
@@ -155,9 +160,14 @@ neon_gif_update(0)
 
 # Виджет корней.
 
-label_roots = tk.Label(win, text='', bg='black', fg='purple',
-                       font=('Segoe UI Variable Text Light', 20))
+label_roots = tk.Label(win, text='', bg='black', fg='purple', font=('Segoe UI Variable Text Light', 20))
 label_roots.pack(pady=20)
+
+# Виджет кривой полосы снизу.
+
+bottom_curve_line_photo = tk.PhotoImage(file='resources/bottom_curve_line_image.png')
+bottom_curve_line = tk.Label(image=bottom_curve_line_photo, background='black', activebackground='black')
+bottom_curve_line.pack(side=tk.BOTTOM, pady=20)
 
 # Все события (клавиатура, мышь) и их описание: https://stackoverflow.com/questions/32289175/list-of-all-tkinter-events
 #                      |
