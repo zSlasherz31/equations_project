@@ -47,6 +47,7 @@ def instr(_event):
              font=('Calibri', 11), justify=tk.LEFT).pack()
     ws.PlaySound('sounds/windows_startup.wav', ws.SND_FILENAME)
     win_instr.after(60000, lambda: win_instr.destroy())
+    return 1
 
 
 def recent_solves(_event):
@@ -64,6 +65,7 @@ def recent_solves(_event):
              fg='purple', font=('Calibri', 11)).pack()
     ws.PlaySound('sounds/windows_startup.wav', ws.SND_FILENAME)
     win_recent.after(60000, lambda: win_recent.destroy())
+    return 1
 
 
 def check(_event):  # В качестве аргумента можно ввести что угодно, но _event не выдаёт предупреждение.
@@ -92,6 +94,7 @@ def check(_event):  # В качестве аргумента можно ввес
         if recent_label_text.count('⤋') == 3:
             recent_label_text = 'Последние решения этой сессии:\n'
         recent_label_text += main_s.replace('**', '^') + ':\n' + final_solve + '⤋\n'
+    return 1
 
 
 def solve(s_x):
@@ -129,6 +132,7 @@ def hide_temp_text(_event):
     if entry1.get() == 'Введите уравнение...':
         entry1.delete(0, tk.END)
     entry1.config(fg='#00fee9')
+    return 1
 
 
 def on_exit():
@@ -136,6 +140,7 @@ def on_exit():
     if mb.askokcancel('Выход из приложения', 'Хотите выйти из приложения?'):
         win.destroy()
         ws.PlaySound('sounds/windows_balloon.wav', ws.SND_FILENAME)
+    return 1
 
 
 def neon_gif_update(indx):
@@ -146,6 +151,7 @@ def neon_gif_update(indx):
         indx = 0
     neon_label.config(image=frame)
     win.after(140, neon_gif_update, indx)
+    return 1
 
 
 # Главное окно.
