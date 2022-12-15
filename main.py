@@ -4,96 +4,138 @@
 
 import tkinter as tk
 from tkinter import messagebox as mb
+from tkinter import scrolledtext as st
 import winsound as ws
 
 # Константы.
-win_instr_massage = '''Как решить уравнение:
-    1. Нажать на поле ввода (надпись «Введите уравнение...»).
-    2. Ввести уравнение, используя требования ниже.
-    3. Нажать кнопку «Решить уравнение» под полем ввода или клавишу enter.
+# NORMAL_SOUND_PLAY_BREAK создается сразу для удобства, т.к. используется часто.
+NORMAL_SOUND_PLAY_BREAK = ws.SND_FILENAME + ws.SND_ASYNC + ws.SND_NODEFAULT
 
-При вводе уравнения заменить привычные математические действия:
-    1. Умножения на «*».
-    2. Деления на «/».
-    3. Возведения в степень на «^».
+instr_text_string = '''(1) Как решить уравнение:
+    • Нажать на поле ввода (надпись «Введите уравнение...»);
+    • Ввести уравнение, используя требования в пункте (2) и (3);
+    • Нажать кнопку «Решить уравнение» под полем ввода или клавишу enter.
 
-Уравнение должно быть записано относительно строчной 
+(2) При вводе уравнения заменить привычные математические действия:
+    • Умножения на «*»;
+    • Деления на «/»;
+    • Возведения в степень на «^».
+
+(3) Уравнение должно быть записано относительно строчной 
 переменной x (английская буква «x») без приравнивания к 0!
 
 Примеры: 
-1. 3 * x^3 + 2 * x^2 + 12
-2. (x / 76) * (12 + x) * x^3 - 21 / 3 * x^2 - 121 * 3'''
+3 * x ^ 3 + 2 * x ^ 2 + 12
+(x / 76) * (12 + x) * x ^ 3 - 21 / 3 * x ^ 2 - 121 * 3'''
 
-error_find_roots_massage = '''Возможно следует дописать уравнение, либо исключить
+check_error_find_roots_string = '''Возможно следует дописать уравнение, либо исключить
 русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), ДЕЛЕНИЕ
 на 0, возведение в степень «x» или же повторяющиеся символы'''
 
-recent_label_text = 'Последние решения этой сессии:\n'
+recent_solves_scrolled_text_string = 'Последние решения этой сессии.\n\n'
 
 
-def instr(_event):
-    """Открывает окно с инструкцией ввода (сама закрывает через 60 с.)."""
+def instr():
+    """Открывает окно с инструкцией ввода (сама закрывает через 200 с.)."""
     # Дочернее окно.
     win_instr = tk.Toplevel()
-    win_instr.geometry(f'530x300+{win.winfo_rootx()}+{win.winfo_rooty()}')
+    # Появляется в левом верхнем углу.
+    win_instr.geometry(f'530x295+{win_main.winfo_rootx()}+{win_main.winfo_rooty()}')
     win_instr.config(bg='black')
     win_instr.title('Инструкция')
     win_instr.resizable(False, False)
-    win_instr.transient(win)
-
-    # Виджет с инструкцией.
-
-    tk.Label(win_instr, text=win_instr_massage, bg='black', fg='purple',
-             font=('Calibri', 11), justify=tk.LEFT).pack()
-    ws.PlaySound('sounds/windows_startup.wav', ws.SND_FILENAME)
-    win_instr.after(60000, lambda: win_instr.destroy())
+    win_instr.transient(win_main)
+    win_instr.protocol('WM_DELETE_WINDOW',
+                       lambda: (win_instr.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK)))
+    # Для инструкции используется Text.
+    instr_text = tk.Text(win_instr, background='black', foreground='purple', font=('Calibri', 11),
+                         relief='solid', selectforeground='#00fee9', selectbackground='black')
+    instr_text.delete('1.0', '1111.1111')
+    instr_text.insert('1.0', instr_text_string)
+    instr_text.config(state='disabled')
+    instr_text.pack()
+    # Звук открытия, затем вызов автоматического закрытия через 200 с.
+    ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
+    win_instr.after(200000, lambda: win_instr.destroy())
     return 1
 
 
-def recent_solves(_event):
-    """Открывает окно с 3-мя последними решениями (сама закрывает через 60 с.)."""
+def recent_solves():
+    """Открывает окно с последними решениями (сама закрывает через 200 с.)."""
+    # Дочернее окно.
     win_recent = tk.Toplevel()
-    win_recent.geometry(f'530x300+{win.winfo_rootx() + win.winfo_width() - 545}+{win.winfo_rooty()}')
+    # Появляется в правом верхнем углу.
+    win_recent.geometry(f'530x295+{win_main.winfo_rootx() + win_main.winfo_width() - 545}+{win_main.winfo_rooty()}')
     win_recent.config(bg='black')
     win_recent.title('Последние решения')
     win_recent.resizable(False, False)
-    win_recent.transient(win)
-
-    # Расширяющийся виджет с последними решениями.
-
-    tk.Label(win_recent, text=recent_label_text, bg='black',
-             fg='purple', font=('Calibri', 11)).pack()
-    ws.PlaySound('sounds/windows_startup.wav', ws.SND_FILENAME)
-    win_recent.after(60000, lambda: win_recent.destroy())
+    win_recent.transient(win_main)
+    win_recent.protocol('WM_DELETE_WINDOW',
+                        lambda: (win_recent.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK)))
+    # Для недавних решений используется ScrolledText.
+    recent_solves_scrolled_text = st.ScrolledText(win_recent, background='black', foreground='purple',
+                                                  relief='solid', font=('Calibri', 11), selectforeground='#00fee9',
+                                                  selectbackground='black')
+    recent_solves_scrolled_text.delete('1.0', '111.1111')
+    recent_solves_scrolled_text.insert('1.0', recent_solves_scrolled_text_string)
+    recent_solves_scrolled_text.tag_config('tag', justify='center')
+    recent_solves_scrolled_text.tag_add('tag', '1.0', '1111.1111')
+    recent_solves_scrolled_text.config(state='disabled')
+    recent_solves_scrolled_text.pack()
+    # Звук открытия, затем вызов автоматического закрытия через 200 с.
+    ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
+    win_recent.after(200000, lambda: win_recent.destroy())
     return 1
 
 
-def check(_event):  # В качестве аргумента можно ввести что угодно, но _event не выдаёт предупреждение.
-    """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни. Расширяет
-    текст виджета недавних 3-х решений, который находится в дочернем окне, привязанном к кнопке
-    недавние решения."""
-    global recent_label_text
-    main_s = entry1.get().replace('^', '**')
+def check(_event):
+    """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни.
+    В случае корректного ввода добавляет уравнение и найденные корни в recent_solves_scrolled_text_string."""
+    # _event необходим для работы из-за нажатия enter (в bind) для решения, без него можно
+    # просто назначить command кнопке, как сделано в остальных случаях и не указывать _event).
+    global recent_solves_scrolled_text_string
+    main_s = entry_center.get().replace('^', '**')
     try:
         final_solve = solve(main_s)
     except (ZeroDivisionError, NameError, SyntaxError):
-        solve_button.config(image=incor_btn_slv_photo)
-        roots_label.config(text='')
-        mb.showerror('Ошибка ввода', error_find_roots_massage)
-        solve_button.config(image=default_btn_slv_photo)
+        text_bottom.config(state='normal')
+        text_bottom.delete('1.0', '1111.1111')
+        text_bottom.config(state='disabled')
+        button_center.config(image=button_center_incorrect_photo)
+        mb.showerror('Ошибка ввода', check_error_find_roots_string)
+        button_center.config(image=button_center_default_photo)
     else:
-        win.bell()
-        solve_button.config(image=cor_btn_slv_photo)
+        button_center.config(image=button_center_correct_photo)
+        win_main.after(4000, lambda: button_center.config(image=button_center_default_photo))
         if final_solve.count('x') > 1:
-            roots_label.config(text=f'Корни вашего уравнения:\n{final_solve}')
+            ws.PlaySound('sounds/funky.wav', NORMAL_SOUND_PLAY_BREAK)
+            # Операции с Text.
+            text_bottom.config(state='normal')
+            text_bottom.delete('1.0', '1111.1111')
+            text_bottom.insert('1.0', f'Корни вашего уравнения:\n{final_solve}')
+            text_bottom.tag_config('tag', justify='center')
+            text_bottom.tag_add('tag', '1.0', '1111.1111')
+            text_bottom.config(state='disabled')
         elif final_solve.count('x') == 1:
-            roots_label.config(text=f'Корень вашего уравнения:\n{final_solve}')
+            ws.PlaySound('sounds/funky.wav', NORMAL_SOUND_PLAY_BREAK)
+            # Операции с Text.
+            text_bottom.config(state='normal')
+            text_bottom.delete('1.0', '1111.1001')
+            text_bottom.insert('1.0', f'Корень вашего уравнения:\n{final_solve}')
+            text_bottom.tag_config('tag', justify='center')
+            text_bottom.tag_add('tag', '1.0', '1111.1001')
+            text_bottom.config(state='disabled')
         else:
-            roots_label.config(text='Данное уравнение не имеет действительных корней')
-        win.after(4000, lambda: solve_button.config(image=default_btn_slv_photo))
-        if recent_label_text.count('⤋') == 3:
-            recent_label_text = 'Последние решения этой сессии:\n'
-        recent_label_text += main_s.replace('**', '^') + ':\n' + final_solve + '⤋\n'
+            ws.PlaySound('sounds/boop.wav', NORMAL_SOUND_PLAY_BREAK)
+            # Операции с Text.
+            text_bottom.config(state='normal')
+            text_bottom.delete('1.0', '1111.1111')
+            text_bottom.insert('1.0', 'Данное уравнение не имеет действительных корней')
+            text_bottom.tag_config('tag', justify='center')
+            text_bottom.tag_add('tag', '1.0', '1111.1111')
+            text_bottom.config(state='disabled')
+        # Добавление решений.
+        recent_solves_scrolled_text_string += f"Решение уравнения:\n{main_s.replace('**', '^')}\n⤋\n{final_solve}\n"
     return 1
 
 
@@ -129,106 +171,103 @@ def root(s, a, b):
 
 def hide_temp_text(_event):
     """Скрывает временный текст в поле ввода."""
-    if entry1.get() == 'Введите уравнение...':
-        entry1.delete(0, tk.END)
-    entry1.config(fg='#00fee9')
+    if entry_center.get() == 'Введите уравнение...':
+        entry_center.delete(0, 'end')
+        entry_center.config(foreground='#00fee9')
     return 1
 
 
 def on_exit():
     """Выводит диалоговое окно при закрытии главного окна."""
     if mb.askokcancel('Выход из приложения', 'Хотите выйти из приложения?'):
-        win.destroy()
-        ws.PlaySound('sounds/windows_balloon.wav', ws.SND_FILENAME)
+        ws.PlaySound('sounds/balloon.wav', NORMAL_SOUND_PLAY_BREAK)
+        win_main.after(850, win_main.destroy())
     return 1
 
 
 def neon_gif_update(indx):
-    """Переключает кадры GIF-ки, находящиеся в neon_bg."""
-    frame = neon_bg[indx]
+    """Переключает кадры GIF-ки, находящиеся в label_center_photos."""
+    frame = label_center_photos[indx]
     indx += 1
-    if indx == gif_frame_cnt:
+    if indx == 52:
         indx = 0
-    neon_label.config(image=frame)
-    win.after(140, neon_gif_update, indx)
+    label_center.config(image=frame)
+    win_main.after(140, neon_gif_update, indx)
     return 1
 
 
 # Главное окно.
-win = tk.Tk()
-main_photo = tk.PhotoImage(file='resources/ico_image.png')
-win.iconphoto(True, main_photo)
-win.title('Equations')
-win.state('zoomed')
-win.minsize(950, 950)
-win.config(bg='black')
-win.protocol('WM_DELETE_WINDOW', on_exit)
+win_main = tk.Tk()
+main_photo = tk.PhotoImage(file='resources/ico.png')
+win_main.iconphoto(True, main_photo)
+win_main.title('Equations')
+win_main.state('zoomed')
+win_main.minsize(950, 950)
+win_main.config(bg='black')
+win_main.protocol('WM_DELETE_WINDOW', on_exit)
 
 # Все последующие элементы расположены в правильном порядке 'прилипания' друг к другу (на это указывает 'side='
-# (по умолчанию tk.TOP - константа), либо 'anchor='); файл с функционалом .pack() оставил в проекте с задачами
+# (по умолчанию tk.TOP - константа), либо 'anchor=').
 # Кнопка помощи.
 
-help_button_photo = tk.PhotoImage(file='resources/instr_image.png')
-help_button = tk.Button(win, image=help_button_photo, background='black',
+button_left_photo = tk.PhotoImage(file='resources/lamp.png')
+button_left = tk.Button(win_main, image=button_left_photo, background='black', command=instr,
                         borderwidth=0, activebackground='black')
-help_button.pack(anchor=tk.NW, side=tk.LEFT, padx=15)
+button_left.pack(anchor=tk.NW, side=tk.LEFT, padx=15)
 
-# Кнопка включения фонового звука.
+# Кнопка недавних.
 
-# turn_bg_sound = True
-recent_button_photo = tk.PhotoImage(file='resources/recent_button_image.png')
-recent_button = tk.Button(win, image=recent_button_photo, background='black',
-                          borderwidth=0, activebackground='black')
-recent_button.pack(anchor=tk.NE, side=tk.RIGHT, padx=15, pady=40)
+button_right_photo = tk.PhotoImage(file='resources/recent.png')
+button_right = tk.Button(win_main, image=button_right_photo, background='black', command=recent_solves,
+                         borderwidth=0, activebackground='black')
+button_right.pack(anchor=tk.NE, side=tk.RIGHT, padx=15, pady=40)
 
-# Вспомогательный виджет, между кнопкой помощи и кнопкой включения фонового звука.
-supportive_label = tk.Label(background='black')
-supportive_label.pack(pady=35)
+# Вспомогательный виджет, между кнопкой помощи и кнопкой недавних.
+label_top = tk.Label(background='black')
+label_top.pack(pady=35)
 
 # Поле ввода.
 
-entry1 = tk.Entry(win, font=('Segoe UI Variable Text Light', 50),
-                  bg='black', fg='#626262', width=25, justify=tk.CENTER,
-                  cursor='tcross',  # Курсоры: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
-                  insertbackground='#626262')
-entry1.insert(0, 'Введите уравнение...')
-entry1.pack(pady=30)
+entry_center = tk.Entry(win_main, font=('Segoe UI Variable Text Light', 50),
+                        bg='black', fg='#626262', width=25, justify=tk.CENTER,
+                        cursor='tcross',  # Курсоры: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
+                        insertbackground='#626262')
+entry_center.insert(0, 'Введите уравнение...')
+entry_center.pack(pady=30)
 
 # Кнопка решения уравнения.
 
-default_btn_slv_photo = tk.PhotoImage(file='resources/default_btn_slv_image.png')
-incor_btn_slv_photo = tk.PhotoImage(file='resources/incor_btn_slv_image.png')
-cor_btn_slv_photo = tk.PhotoImage(file='resources/cor_btn_slv_image.png')
-solve_button = tk.Button(win, image=default_btn_slv_photo, background='black',
-                         borderwidth=0, activebackground='black')
-solve_button.pack(pady=30)
+button_center_default_photo = tk.PhotoImage(file='resources/default_button.png')
+button_center_incorrect_photo = tk.PhotoImage(file='resources/incorrect_button.png')
+button_center_correct_photo = tk.PhotoImage(file='resources/correct_button.png')
+button_center = tk.Button(win_main, image=button_center_default_photo, background='black',
+                          borderwidth=0, activebackground='black')
+button_center.pack(pady=30)
 
-# Виджет неонового GIFa.
+# Виджет (Label) неонового GIFa.
 
-gif_frame_cnt = 52
-neon_bg = [tk.PhotoImage(file='resources/neon_bg.gif', format=f'gif -index {i}') for i in range(gif_frame_cnt)]
-neon_label = tk.Label(win, bg='black')
-neon_label.pack(pady=40)
+label_center_photos = [tk.PhotoImage(file='resources/neon.gif', format=f'gif -index {i}') for i in range(52)]
+label_center = tk.Label(win_main, bg='black')
+label_center.pack(pady=40)
 neon_gif_update(0)
 
-# Виджет корней.
+# Виджет (Text) корней.
 
-roots_label = tk.Label(win, text='', bg='black', fg='purple',
-                       font=('Segoe UI Variable Text Light', 20))
-roots_label.pack(pady=20)
+text_bottom = tk.Text(win_main, width=45, height=6, background='black', foreground='purple',
+                      font=('Segoe UI Variable Text Light', 20), relief='solid',
+                      selectforeground='#00fee9', selectbackground='black')
+text_bottom.pack()
 
-# Виджет кривой полосы снизу.
+# Виджет (Label) кривой полосы снизу.
 
-bottom_curve_line_photo = tk.PhotoImage(file='resources/bottom_curve_line_image.png')
-bottom_curve_line_label = tk.Label(image=bottom_curve_line_photo, background='black', activebackground='black')
-bottom_curve_line_label.pack(side=tk.BOTTOM, pady=20)
+label_bottom_photo = tk.PhotoImage(file='resources/curve_line.png')
+label_bottom = tk.Label(image=label_bottom_photo, background='black', activebackground='black')
+label_bottom.pack(side=tk.BOTTOM, pady=20)
 
 # Все события (клавиатура, мышь) и их описание: https://stackoverflow.com/questions/32289175/list-of-all-tkinter-events
-#                      |
-help_button.bind('<Button-1>', instr)
-recent_button.bind('<Button-1>', recent_solves)
-solve_button.bind('<Button-1>', check)
-entry1.bind('<Button-1>', hide_temp_text)
-entry1.bind('<Return>', check)
+#                       |
+button_center.bind('<Button-1>', check)
+entry_center.bind('<Return>', check)
+entry_center.bind('<Button-1>', hide_temp_text)
 
-win.mainloop()
+win_main.mainloop()
