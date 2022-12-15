@@ -28,6 +28,8 @@ error_find_roots_massage = '''Возможно следует дописать �
 русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), ДЕЛЕНИЕ
 на 0, возведение в степень «x» или же повторяющиеся символы'''
 
+recent_label_text = 'Последние решения этой сессии:\n'
+
 
 def instr(_event):
     """Открывает окно с инструкцией ввода (сама закрывает через 60 с.)."""
@@ -47,21 +49,28 @@ def instr(_event):
     win_instr.after(60000, lambda: win_instr.destroy())
 
 
-def play_bg_sound(_event):
-    """Включает/выключает фоновый звук."""
-    global turn_bg_sound
-    if turn_bg_sound:
-        turn_bg_sound = False
-        ws.PlaySound('sounds/windows_hardware_insert.wav', ws.SND_FILENAME)
-        ws.PlaySound('sounds/background_sound.wav', ws.SND_FILENAME + ws.SND_ASYNC + ws.SND_LOOP)
-    else:
-        turn_bg_sound = True
-        ws.PlaySound(None, ws.SND_FILENAME)
-        ws.PlaySound('sounds/windows_hardware_fail.wav', ws.SND_FILENAME)
+def recent_solves(_event):
+    """Открывает окно с 3-мя последними решениями (сама закрывает через 60 с.)."""
+    win_recent = tk.Toplevel()
+    win_recent.geometry(f'530x300+{win.winfo_rootx() + win.winfo_width() - 545}+{win.winfo_rooty()}')
+    win_recent.config(bg='black')
+    win_recent.title('Последние решения')
+    win_recent.resizable(False, False)
+    win_recent.transient(win)
+
+    # Расширяющийся виджет с последними решениями.
+
+    tk.Label(win_recent, text=recent_label_text, bg='black',
+             fg='purple', font=('Calibri', 11)).pack()
+    ws.PlaySound('sounds/windows_startup.wav', ws.SND_FILENAME)
+    win_recent.after(60000, lambda: win_recent.destroy())
 
 
 def check(_event):  # В качестве аргумента можно ввести что угодно, но _event не выдаёт предупреждение.
-    """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни."""
+    """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни. Расширяет
+    текст виджета недавних 3-х решений, который находится в дочернем окне, привязанном к кнопке
+    недавние решения."""
+    global recent_label_text
     main_s = entry1.get().replace('^', '**')
     try:
         final_solve = solve(main_s)
@@ -80,6 +89,9 @@ def check(_event):  # В качестве аргумента можно ввес
         else:
             roots_label.config(text='Данное уравнение не имеет действительных корней')
         win.after(4000, lambda: solve_button.config(image=default_btn_slv_photo))
+        if recent_label_text.count('⤋') == 3:
+            recent_label_text = 'Последние решения этой сессии:\n'
+        recent_label_text += main_s.replace('**', '^') + ':\n' + final_solve + '⤋\n'
 
 
 def solve(s_x):
@@ -147,7 +159,7 @@ win.config(bg='black')
 win.protocol('WM_DELETE_WINDOW', on_exit)
 
 # Все последующие элементы расположены в правильном порядке 'прилипания' друг к другу (на это указывает 'side='
-# (по умолчанию tk.TOP - константа), либо 'anchor='); файл с функционалом .pack() оставлю в проекте с задачами
+# (по умолчанию tk.TOP - константа), либо 'anchor='); файл с функционалом .pack() оставил в проекте с задачами
 # Кнопка помощи.
 
 help_button_photo = tk.PhotoImage(file='resources/instr_image.png')
@@ -157,15 +169,15 @@ help_button.pack(anchor=tk.NW, side=tk.LEFT, padx=15)
 
 # Кнопка включения фонового звука.
 
-turn_bg_sound = True
-play_button_photo = tk.PhotoImage(file='resources/play_button_image.png')
-play_button = tk.Button(win, image=play_button_photo, background='black',
-                        borderwidth=0, activebackground='black')
-play_button.pack(anchor=tk.NE, side=tk.RIGHT, padx=15, pady=15)
+# turn_bg_sound = True
+recent_button_photo = tk.PhotoImage(file='resources/recent_button_image.png')
+recent_button = tk.Button(win, image=recent_button_photo, background='black',
+                          borderwidth=0, activebackground='black')
+recent_button.pack(anchor=tk.NE, side=tk.RIGHT, padx=15, pady=40)
 
 # Вспомогательный виджет, между кнопкой помощи и кнопкой включения фонового звука.
-supportive_label = tk.Label(font=('Segoe UI Variable Text Light', 50), background='black')
-supportive_label.pack()
+supportive_label = tk.Label(background='black')
+supportive_label.pack(pady=35)
 
 # Поле ввода.
 
@@ -208,7 +220,7 @@ bottom_curve_line_label.pack(side=tk.BOTTOM, pady=20)
 # Все события (клавиатура, мышь) и их описание: https://stackoverflow.com/questions/32289175/list-of-all-tkinter-events
 #                      |
 help_button.bind('<Button-1>', instr)
-play_button.bind('<Button-1>', play_bg_sound)
+recent_button.bind('<Button-1>', recent_solves)
 solve_button.bind('<Button-1>', check)
 entry1.bind('<Button-1>', hide_temp_text)
 entry1.bind('<Return>', check)
