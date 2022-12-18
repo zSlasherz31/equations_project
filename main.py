@@ -22,15 +22,15 @@ instr_text_string = '''(1) Как решить уравнение:
     • Возведения в степень на «^».
 
 (3) Уравнение должно быть записано относительно строчной 
-переменной x (английская буква «x») без приравнивания к 0!
+переменной x (английская буква «x») с приравниванием к 0 или без.
 
 Примеры: 
-3 * x ^ 3 + 2 * x ^ 2 + 12
-(x / 76) * (12 + x) * x ^ 3 - 21 / 3 * x ^ 2 - 121 * 3'''
+3 ^ 8 * x ^ 3 + 2 * x ^ 2 + 12 = 0
+(-x / 7.6 + 2) * (12 + x) * x ^ 3 - 21 ^ 2 / (3 * x - 4) ^ 2 - 12,1 * 3 ^ 21'''
 
 check_error_find_roots_string = '''Возможно следует дописать уравнение, либо исключить
-русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^»), пустую строку (пробел), ДЕЛЕНИЕ
-на 0, возведение в степень «x» или же повторяющиеся символы'''
+русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^» и скобок), пустую строку, ДЕЛЕНИЕ
+на 0 или же повторяющиеся символы.'''
 
 recent_solves_scrolled_text_string = 'Последние решения этой сессии.\n\n'
 
@@ -94,10 +94,13 @@ def check(_event):
     # _event необходим для работы из-за нажатия enter (в bind) для решения, без него можно
     # просто назначить command кнопке, как сделано в остальных случаях и не указывать _event).
     global recent_solves_scrolled_text_string
-    main_s = entry_center.get().replace('^', '**')
+    main_s = entry_center.get().replace('^', '**').replace(',', '.').replace(' ', '')
+    equal_sign = main_s.rfind('=')
+    if equal_sign != -1 and main_s[equal_sign:] == '=0':
+        main_s = main_s[:equal_sign]
     try:
         final_solve = solve(main_s)
-    except (ZeroDivisionError, NameError, SyntaxError):
+    except (ZeroDivisionError, NameError, SyntaxError, TypeError):
         text_bottom.config(state='normal')
         text_bottom.delete('1.0', '1111.1111')
         text_bottom.config(state='disabled')
@@ -135,7 +138,7 @@ def check(_event):
             text_bottom.tag_add('tag', '1.0', '1111.1111')
             text_bottom.config(state='disabled')
         # Добавление решений.
-        recent_solves_scrolled_text_string += f"Решение уравнения:\n{main_s.replace('**', '^')}\n⤋\n{final_solve}\n"
+        recent_solves_scrolled_text_string += f"Решение уравнения:\n{main_s.replace('**', '^')}=0\n⤋\n{final_solve}\n"
     return 1
 
 
