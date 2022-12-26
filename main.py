@@ -9,6 +9,7 @@ import winsound as ws
 
 # Константы.
 # NORMAL_SOUND_PLAY_BREAK создается сразу для удобства, т.к. используется часто.
+
 NORMAL_SOUND_PLAY_BREAK = ws.SND_FILENAME + ws.SND_ASYNC + ws.SND_NODEFAULT
 
 instr_text_string = '''(1) Как решить уравнение:
@@ -29,14 +30,16 @@ x ^ 3 + 1 = 0
 3 ^ 8 * x ^ 3 + 2 * x ^ 2 + 12 = 0
 (-x / 7.6 + 2) * (12 + x) * x ^ 3 - 21 ^ 2 / (3 * x - 4) ^ 21 * 3 ^ 21
 
-*Любой текст можно копировать с помощью выделения, а затем
-нажатия сочетания клавиш ctrl + c. Копировать можно примеры,
-последние решения, найденные корни. Их можно листать, если
-все не вмещаются в поле вывода.'''
+Примечание.
+Любой текст можно копировать с помощью выделения, а затем нажатия
+сочетания клавиш ctrl + c. Копировать можно примеры, найденные корни
+последние решения и т.д. Найденные корни можно пролистывать, если
+их слишком много. Также, можно включать или выключать
+дополнительные звуки.'''
 
 check_error_find_roots_string = '''Возможно следует дописать уравнение, либо исключить
 русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^» и скобок), пустую строку, ДЕЛЕНИЕ
-на 0 или же повторяющиеся символы.'''
+на 0, повторяющиеся символы и т.д.'''
 
 recent_solves_scrolled_text_string = 'Последние решения этой сессии.\n\n'
 
@@ -51,8 +54,10 @@ def instr():
     win_instr.title('Инструкция')
     win_instr.resizable(False, False)
     win_instr.transient(win_main)
-    win_instr.protocol('WM_DELETE_WINDOW',
-                       lambda: (win_instr.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK)))
+    win_instr.protocol('WM_DELETE_WINDOW', lambda:
+    (win_instr.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK))
+    if sounds_on
+    else win_instr.destroy())
     # Для инструкции используется Text.
     instr_scrolled_text = st.ScrolledText(win_instr, background='black', foreground='purple', font=('Calibri', 11),
                                           relief='solid', selectforeground='#00fee9', selectbackground='black')
@@ -62,8 +67,9 @@ def instr():
     instr_scrolled_text.tag_add('tag', '18.0', 'end')
     instr_scrolled_text.config(state='disabled')
     instr_scrolled_text.pack()
-    # Звук открытия, затем вызов автоматического закрытия через 200 с.
-    ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
+    # Звук открытия при выключенном бесшумном режиме, затем вызов автоматического закрытия через 200 с.
+    if sounds_on:
+        ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
     win_instr.after(200000, lambda: win_instr.destroy())
     return 1
 
@@ -78,8 +84,10 @@ def recent_solves():
     win_recent.title('Последние решения')
     win_recent.resizable(False, False)
     win_recent.transient(win_main)
-    win_recent.protocol('WM_DELETE_WINDOW',
-                        lambda: (win_recent.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK)))
+    win_recent.protocol('WM_DELETE_WINDOW', lambda:
+    (win_recent.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK))
+    if sounds_on
+    else win_recent.destroy())
     # Для недавних решений используется ScrolledText.
     recent_solves_scrolled_text = st.ScrolledText(win_recent, background='black', foreground='purple', relief='solid',
                                                   font=('Calibri', 11), selectforeground='#00fee9',
@@ -90,8 +98,9 @@ def recent_solves():
     recent_solves_scrolled_text.tag_add('tag', '0.0', 'end')
     recent_solves_scrolled_text.config(state='disabled')
     recent_solves_scrolled_text.pack()
-    # Звук открытия, затем вызов автоматического закрытия через 200 с.
-    ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
+    # Звук открытия при выключенном бесшумном режиме, затем вызов автоматического закрытия через 200 с.
+    if sounds_on:
+        ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
     win_recent.after(200000, lambda: win_recent.destroy())
     return 1
 
@@ -117,23 +126,25 @@ def check(_event):
         button_center.config(image=button_center_default_photo)
     else:
         button_center.config(image=button_center_correct_photo)
-        win_main.after(4000, lambda: button_center.config(image=button_center_default_photo))
         count_x = final_solve.count('x')
         # Операции с Text.
         text_bottom.config(state='normal')
         text_bottom.delete('0.0', 'end')
         if count_x > 0:
-            ws.PlaySound('sounds/funky.wav', NORMAL_SOUND_PLAY_BREAK)
+            if sounds_on:
+                ws.PlaySound('sounds/funky.wav', NORMAL_SOUND_PLAY_BREAK)
             if count_x > 1:
                 text_bottom.insert('0.0', f'Корни вашего уравнения:\n{final_solve}')
             else:
                 text_bottom.insert('0.0', f'Корень вашего уравнения:\n{final_solve}')
         else:
-            ws.PlaySound('sounds/boop.wav', NORMAL_SOUND_PLAY_BREAK)
+            if sounds_on:
+                ws.PlaySound('sounds/boop.wav', NORMAL_SOUND_PLAY_BREAK)
             text_bottom.insert('1.0', 'Данное уравнение не имеет действительных корней')
         text_bottom.tag_config('tag', justify='center')
         text_bottom.tag_add('tag', '0.0', 'end')
         text_bottom.config(state='disabled')
+        win_main.after(4000, lambda: button_center.config(image=button_center_default_photo))
         # Добавление решений.
         recent_solves_scrolled_text_string += f"Решение уравнения:\n{main_s.replace('**', '^')}=0\n⤋\n{final_solve}\n"
     return 1
@@ -169,18 +180,42 @@ def root(s, a, b):
     return round((a + b) / 2, 4)
 
 
+def turn_off_on_sounds():
+    global sounds_on
+    if sounds_on:
+        ws.PlaySound('sounds/mute.wav', NORMAL_SOUND_PLAY_BREAK)
+        button_right2.config(image=button_right2_silent_photo)
+        sounds_on = False
+    else:
+        ws.PlaySound('sounds/unmute.wav', NORMAL_SOUND_PLAY_BREAK)
+        button_right2.config(image=button_right2_normal_photo)
+        sounds_on = True
+    return 1
+
+
 def hide_temp_text(_event):
     """Скрывает временный текст в поле ввода."""
+    entry_center.config(state='normal')
     if entry_center.get() == 'Введите уравнение...':
-        entry_center.delete(0, 'end')
         entry_center.config(foreground='#00fee9')
+        entry_center.delete(0, 'end')
+    return 1
+
+
+def show_temp_text(_event):
+    """Показывает временный текст в поле ввода."""
+    if entry_center.get() == '':
+        entry_center.config(foreground='#626262')
+        entry_center.insert(0, 'Введите уравнение...')
+        entry_center.config(state='disabled')
     return 1
 
 
 def on_exit():
     """Выводит диалоговое окно при закрытии главного окна."""
     if mb.askokcancel('Выход из приложения', 'Хотите выйти из приложения?'):
-        ws.PlaySound('sounds/balloon.wav', NORMAL_SOUND_PLAY_BREAK)
+        if sounds_on:
+            ws.PlaySound('sounds/balloon.wav', NORMAL_SOUND_PLAY_BREAK)
         win_main.after(850, win_main.destroy())
     return 1
 
@@ -215,17 +250,27 @@ button_left.grid(row=0, column=0, padx=10, sticky='nw')
 
 # Кнопка недавних.
 
-button_right_photo = tk.PhotoImage(file='resources/recent.png')
-button_right = tk.Button(win_main, image=button_right_photo, background='black', command=recent_solves,
-                         borderwidth=0, activebackground='black')
-button_right.grid(row=0, column=2, padx=10, pady=30, sticky='ne')
+button_right1_photo = tk.PhotoImage(file='resources/recent.png')
+button_right1 = tk.Button(win_main, image=button_right1_photo, background='black', command=recent_solves,
+                          borderwidth=0, activebackground='black')
+button_right1.grid(row=0, column=2, padx=10, pady=10, sticky='ne')
+
+# Кнопка переключения режимов звука.
+
+sounds_on = True
+button_right2_normal_photo = tk.PhotoImage(file='resources/normal.png')
+button_right2_silent_photo = tk.PhotoImage(file='resources/silent.png')
+button_right2 = tk.Button(win_main, image=button_right2_normal_photo, background='black', command=turn_off_on_sounds,
+                          borderwidth=0, activebackground='black')
+button_right2.grid(row=0, column=2, padx=14, pady=10, sticky='se')
 
 # Поле ввода.
+# Курсоры для поля ввода: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
 
-entry_center = tk.Entry(win_main, font=('Segoe UI Variable Text Light', 50),
-                        bg='black', fg='#626262', width=20, justify=tk.CENTER,
-                        cursor='plus',  # Курсоры: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/cursors.html
-                        insertbackground='#626262')
+entry_center = tk.Entry(win_main, font=('Segoe UI Variable Text Light', 50), width=20, justify='center',
+                        background='black', foreground='#626262', borderwidth=1, cursor='tcross',
+                        selectforeground='#626262', selectbackground='black', disabledbackground='black',
+                        insertbackground='#626262', insertwidth=1)  # Конфигурация мигающей каретки.
 entry_center.insert(0, 'Введите уравнение...')
 entry_center.grid(row=1, column=1, sticky='we')
 
@@ -274,5 +319,6 @@ win_main.rowconfigure(5, weight=1)
 button_center.bind('<Button-1>', check)
 entry_center.bind('<Return>', check)
 entry_center.bind('<Button-1>', hide_temp_text)
+entry_center.bind('<BackSpace>', show_temp_text)
 
 win_main.mainloop()
