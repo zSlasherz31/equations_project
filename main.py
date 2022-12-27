@@ -245,7 +245,7 @@ win_main.protocol('WM_DELETE_WINDOW', on_exit)
 button_left_photo = tk.PhotoImage(file='resources/lamp.png')
 button_left = tk.Button(win_main, image=button_left_photo, background='black', command=instr,
                         borderwidth=0, activebackground='black')
-button_left.grid(row=0, column=0, padx=10, sticky='nw')
+button_left.grid(row=0, column=0, padx=3, sticky='nw')
 
 # Кнопка недавних.
 
