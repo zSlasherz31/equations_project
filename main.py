@@ -56,8 +56,7 @@ def instr():
     win_instr.transient(win_main)
     win_instr.protocol('WM_DELETE_WINDOW', lambda:
                        (win_instr.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK))
-                       if sounds_on
-                       else win_instr.destroy())
+                       if sounds_on else win_instr.destroy())
     # Для инструкции используется Text.
     instr_scrolled_text = st.ScrolledText(win_instr, background='black', foreground='purple', font=('Calibri', 11),
                                           relief='solid', selectforeground='#00fee9', selectbackground='black')
@@ -86,8 +85,7 @@ def recent_solves():
     win_recent.transient(win_main)
     win_recent.protocol('WM_DELETE_WINDOW', lambda:
                         (win_recent.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK))
-                        if sounds_on
-                        else win_recent.destroy())
+                        if sounds_on else win_recent.destroy())
     # Для недавних решений используется ScrolledText.
     recent_solves_scrolled_text = st.ScrolledText(win_recent, background='black', foreground='purple', relief='solid',
                                                   font=('Calibri', 11), selectforeground='#00fee9',
@@ -181,6 +179,7 @@ def root(s, a, b):
 
 
 def turn_off_on_sounds():
+    """Выключает/включает бесшумный режим."""
     global sounds_on
     if sounds_on:
         ws.PlaySound('sounds/mute.wav', NORMAL_SOUND_PLAY_BREAK)
