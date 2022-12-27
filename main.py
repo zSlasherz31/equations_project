@@ -1,5 +1,9 @@
-"""Программа предоставляет возможность находить корни уравнений.
-Графический интерфейс осуществлен с помощью встроенного графического модуля Tkinter.
+"""Графический интерфейс осуществлен с помощью встроенного графического модуля Tkinter.
+Предоставляется возможность находить корни уравнений.
+Полезные ссылки:
+https://www.figma.com
+https://www.colorspire.com
+https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/index.html
 """
 
 import tkinter as tk
@@ -30,7 +34,6 @@ x ^ 3 + 1 = 0
 3 ^ 8 * x ^ 3 + 2 * x ^ 2 + 12 = 0
 (-x / 7.6 + 2) * (12 + x) * x ^ 3 - 21 ^ 2 / (3 * x - 4) ^ 21 * 3 ^ 21
 
-Примечание.
 Любой текст можно копировать с помощью выделения, а затем нажатия
 сочетания клавиш ctrl + c. Копировать можно примеры, найденные корни
 последние решения и т.д. Найденные корни можно пролистывать, если
@@ -62,8 +65,8 @@ def instr():
                                           relief='solid', selectforeground='#00fee9', selectbackground='black')
     instr_scrolled_text.delete('0.0', 'end')
     instr_scrolled_text.insert('0.0', instr_text_string)
-    instr_scrolled_text.tag_config('tag', font=('Calibri', 11, 'italic', 'bold'))
-    instr_scrolled_text.tag_add('tag', '18.0', 'end')
+    instr_scrolled_text.tag_config('tag', font=('Calibri', 11, 'italic', 'bold'), justify='center')
+    instr_scrolled_text.tag_add('tag', '19.0', 'end')
     instr_scrolled_text.config(state='disabled')
     instr_scrolled_text.pack()
     # Звук открытия при выключенном бесшумном режиме, затем вызов автоматического закрытия через 200 с.
@@ -107,7 +110,7 @@ def check(_event):
     """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни.
     В случае корректного ввода добавляет уравнение и найденные корни в recent_solves_scrolled_text_string."""
     # _event необходим для работы из-за нажатия enter (в bind) для решения, без него можно
-    # просто назначить command кнопке, как сделано в остальных случаях и не указывать _event).
+    # просто назначить command кнопке, как сделано в остальных случаях и не указывать _event.
     global recent_solves_scrolled_text_string
     main_s = entry_center.get().replace('^', '**').replace(',', '.').replace(' ', '')
     equal_sign = main_s.rfind('=')
@@ -285,7 +288,7 @@ button_center.grid(row=2, column=1)
 # Виджет (Label) неонового GIFa.
 
 label_center_photos = [tk.PhotoImage(file='resources/neon.gif', format=f'gif -index {i}') for i in range(52)]
-label_center = tk.Label(win_main, bg='black')
+label_center = tk.Label(win_main, background='black')
 label_center.grid(row=3, column=1)
 neon_gif_update(0)
 
@@ -299,11 +302,12 @@ text_bottom.grid(row=4, column=1)
 # Виджет (Label) кривой полосы снизу.
 
 label_bottom_photo = tk.PhotoImage(file='resources/curve_line.png')
-label_bottom = tk.Label(image=label_bottom_photo, background='black', activebackground='black')
+label_bottom = tk.Label(image=label_bottom_photo, background='black')
 label_bottom.grid(row=5, column=1)
 
 # Позволяем всем использующимся колонкам и строкам увеличиваться, если есть доп. место.
-# По умолчанию weight=0 (или False), а weight=1 (или True).
+# Именованный аргумент weight=1 означает, что при растяжении сетки строки и колонки
+# распределят место поровну, т.к. везде стоит единица.
 win_main.columnconfigure(0, weight=1)
 win_main.columnconfigure(1, weight=1)
 win_main.columnconfigure(2, weight=1)
