@@ -1,4 +1,5 @@
-"""Графический интерфейс осуществлен с помощью встроенного графического модуля Tkinter.
+"""
+Графический интерфейс осуществлен с помощью встроенного графического модуля Tkinter.
 Предоставляется возможность находить корни уравнений.
 Полезные ссылки:
 https://www.figma.com
@@ -7,9 +8,9 @@ https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/index.html
 """
 
 import tkinter as tk
-from tkinter import messagebox as mb
-from tkinter import scrolledtext as st
 import winsound as ws
+from tkinter import (messagebox as mb,
+                     scrolledtext as st)
 
 # Константы.
 # NORMAL_SOUND_PLAY_BREAK создается сразу для удобства, т.к. используется часто.
@@ -47,7 +48,7 @@ check_error_find_roots_string = '''Возможно следует дописа�
 recent_solves_scrolled_text_string = 'Последние решения этой сессии.\n\n'
 
 
-def instr():
+def instr() -> None:
     """Открывает окно с инструкцией ввода (сама закрывает через 200 с.)."""
     # Дочернее окно.
     win_instr = tk.Toplevel()
@@ -73,10 +74,9 @@ def instr():
     if sounds_on:
         ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
     win_instr.after(200000, lambda: win_instr.destroy())
-    return 1
 
 
-def recent_solves():
+def recent_solves() -> None:
     """Открывает окно с последними решениями (сама закрывает через 200 с.)."""
     # Дочернее окно.
     win_recent = tk.Toplevel()
@@ -103,10 +103,9 @@ def recent_solves():
     if sounds_on:
         ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
     win_recent.after(200000, lambda: win_recent.destroy())
-    return 1
 
 
-def check(_event):
+def check(_event) -> None:
     """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни.
     В случае корректного ввода добавляет уравнение и найденные корни в recent_solves_scrolled_text_string."""
     # _event необходим для работы из-за нажатия enter (в bind) для решения, без него можно
@@ -148,40 +147,39 @@ def check(_event):
         win_main.after(4000, lambda: button_center.config(image=button_center_default_photo))
         # Добавление решений.
         recent_solves_scrolled_text_string += f"Решение уравнения:\n{main_s.replace('**', '^')}=0\n⤋\n{final_solve}\n"
-    return 1
 
 
-def solve(s_x):
+def solve(s_x) -> str:
     """Находит отрезки с корнями."""
-    h, x1, final_roots = 1, -10000, ''
-    while x1 <= 10000:
-        x = x1
+    # Здесь eval использует глобальную и локальную
+    # области видимости, находя x в локальной.
+    step, x, final_roots = 1, -10000, ''
+    while x <= 10000:
         y1 = eval(s_x)
-        x = x1 + h
+        x += step
         y2 = eval(s_x)
         if y1 * y2 < 0:
-            final_roots += f'x ≈ {str(root(s_x, x1, x1 + h))}\n'
-        x1 += h
+            final_roots += F'x ≈ {root(s_x, x - 1, x):.4}\n'
     return final_roots
 
 
-def root(s, a, b):
+def root(s, a, b) -> float:
     """Уточняет корень на отрезке."""
-    eps = 0.00001
+    scope, eps = {'x': ...}, 1e-5  # .00001
     while b - a > eps:
-        x = a
-        y1 = eval(s)
+        scope['x'] = a
+        y1 = eval(s, scope)
         c = (a + b) / 2
-        x = c
-        y3 = eval(s)
+        scope['x'] = c
+        y3 = eval(s, scope)
         if y1 * y3 < 0:
             b = c
         else:
             a = c
-    return round((a + b) / 2, 4)
+    return (a + b) / 2
 
 
-def turn_off_on_sounds():
+def turn_off_on_sounds() -> None:
     """Выключает/включает бесшумный режим."""
     global sounds_on
     if sounds_on:
@@ -192,37 +190,33 @@ def turn_off_on_sounds():
         ws.PlaySound('sounds/unmute.wav', NORMAL_SOUND_PLAY_BREAK)
         button_right2.config(image=button_right2_normal_photo)
         sounds_on = True
-    return 1
 
 
-def hide_temp_text(_event):
+def hide_temp_text(_event) -> None:
     """Скрывает временный текст в поле ввода."""
     entry_center.config(state='normal')
     if entry_center.get() == 'Введите уравнение...':
         entry_center.config(foreground='#00fee9')
         entry_center.delete(0, 'end')
-    return 1
 
 
-def show_temp_text(_event):
+def show_temp_text(_event) -> None:
     """Показывает временный текст в поле ввода."""
     if entry_center.get() == '':
         entry_center.config(foreground='#626262')
         entry_center.insert(0, 'Введите уравнение...')
         entry_center.config(state='disabled')
-    return 1
 
 
-def on_exit():
+def on_exit() -> None:
     """Выводит диалоговое окно при закрытии главного окна."""
     if mb.askokcancel('Выход из приложения', 'Хотите выйти из приложения?'):
         if sounds_on:
             ws.PlaySound('sounds/balloon.wav', NORMAL_SOUND_PLAY_BREAK)
         win_main.after(850, win_main.destroy())
-    return 1
 
 
-def neon_gif_update(indx):
+def neon_gif_update(indx) -> None:
     """Переключает кадры GIF-ки, находящиеся в label_center_photos."""
     frame = label_center_photos[indx]
     indx += 1
@@ -230,7 +224,6 @@ def neon_gif_update(indx):
         indx = 0
     label_center.config(image=frame)
     win_main.after(140, neon_gif_update, indx)
-    return 1
 
 
 # Главное окно.
@@ -308,14 +301,8 @@ label_bottom.grid(row=5, column=1)
 # Позволяем всем использующимся колонкам и строкам увеличиваться, если есть доп. место.
 # Именованный аргумент weight=1 означает, что при растяжении сетки строки и колонки
 # распределят место поровну, т.к. везде стоит единица.
-win_main.columnconfigure(0, weight=1)
-win_main.columnconfigure(1, weight=1)
-win_main.columnconfigure(2, weight=1)
-win_main.rowconfigure(1, weight=1)
-win_main.rowconfigure(2, weight=1)
-win_main.rowconfigure(3, weight=1)
-win_main.rowconfigure(4, weight=1)
-win_main.rowconfigure(5, weight=1)
+[win_main.columnconfigure(column, weight=1) for column in range(3)]
+[win_main.rowconfigure(row, weight=1) for row in range(1, 6)]
 
 # Все события (клавиатура, мышь) и их описание: https://stackoverflow.com/questions/32289175/list-of-all-tkinter-events
 #                       |
