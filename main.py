@@ -1,51 +1,19 @@
 """
 Графический интерфейс осуществлен с помощью встроенного графического модуля Tkinter.
 Предоставляется возможность находить корни уравнений.
-Полезные ссылки:
-https://www.figma.com
-https://www.colorspire.com
-https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/index.html
 """
 
+# Внешние импорты
 import tkinter as tk
 import winsound as ws
-from tkinter import (messagebox as mb,
-                     scrolledtext as st)
+from tkinter import messagebox as mb, scrolledtext as st
 
-# Константы.
+# Внутренние импорты
+from myconstants import *
+from variables import Vars
+
 # NORMAL_SOUND_PLAY_BREAK создается сразу для удобства, т.к. используется часто.
-
 NORMAL_SOUND_PLAY_BREAK = ws.SND_FILENAME + ws.SND_ASYNC + ws.SND_NODEFAULT
-
-instr_text_string = '''(1) Как решить уравнение:
-    • Нажать на поле ввода (надпись «Введите уравнение...»);
-    • Ввести уравнение, используя требования в пункте (2) и (3);
-    • Нажать кнопку «Решить уравнение» под полем ввода или клавишу enter.
-
-(2) При вводе уравнения заменить привычные математические действия:
-    • Умножения на «*»;
-    • Деления на «/»;
-    • Возведения в степень на «^».
-
-(3) Уравнение должно быть записано относительно строчной
-переменной x (английская буква «x») с приравниванием к 0 или без.
-
-Примеры: 
-x ^ 3 + 1 = 0
-3 ^ 8 * x ^ 3 + 2 * x ^ 2 + 12 = 0
-(-x / 7.6 + 2) * (12 + x) * x ^ 3 - 21 ^ 2 / (3 * x - 4) ^ 21 * 3 ^ 21
-
-Любой текст можно копировать с помощью выделения, а затем нажатия
-сочетания клавиш ctrl + c. Копировать можно примеры, найденные корни
-последние решения и т.д. Найденные корни можно пролистывать, если
-их слишком много. Также, можно включать или выключать
-дополнительные звуки.'''
-
-check_error_find_roots_string = '''Возможно следует дописать уравнение, либо исключить
-русские буквы, английские (кроме «x»), спецсимволы (кроме «*», «/», «^» и скобок), пустую строку, ДЕЛЕНИЕ
-на 0, повторяющиеся символы и т.д.'''
-
-recent_solves_scrolled_text_string = 'Последние решения этой сессии.\n\n'
 
 
 def instr() -> None:
@@ -60,7 +28,7 @@ def instr() -> None:
     win_instr.transient(win_main)
     win_instr.protocol('WM_DELETE_WINDOW', lambda:
                        (win_instr.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK))
-                       if sounds_on else win_instr.destroy())
+                       if Vars.sounds_on else win_instr.destroy())
     # Для инструкции используется Text.
     instr_scrolled_text = st.ScrolledText(win_instr, background='black', foreground='purple', font=('Calibri', 11),
                                           relief='solid', selectforeground='#00fee9', selectbackground='black')
@@ -71,7 +39,7 @@ def instr() -> None:
     instr_scrolled_text.config(state='disabled')
     instr_scrolled_text.pack()
     # Звук открытия при выключенном бесшумном режиме, затем вызов автоматического закрытия через 200 с.
-    if sounds_on:
+    if Vars.sounds_on:
         ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
     win_instr.after(200000, lambda: win_instr.destroy())
 
@@ -88,29 +56,28 @@ def recent_solves() -> None:
     win_recent.transient(win_main)
     win_recent.protocol('WM_DELETE_WINDOW', lambda:
                         (win_recent.destroy(), ws.PlaySound('sounds/pong.wav', NORMAL_SOUND_PLAY_BREAK))
-                        if sounds_on else win_recent.destroy())
+                        if Vars.sounds_on else win_recent.destroy())
     # Для недавних решений используется ScrolledText.
     recent_solves_scrolled_text = st.ScrolledText(win_recent, background='black', foreground='purple', relief='solid',
                                                   font=('Calibri', 11), selectforeground='#00fee9',
                                                   selectbackground='black')
     recent_solves_scrolled_text.delete('0.0', 'end')
-    recent_solves_scrolled_text.insert('0.0', recent_solves_scrolled_text_string)
+    recent_solves_scrolled_text.insert('0.0', Vars.recent_solves_scrolled_text_string)
     recent_solves_scrolled_text.tag_config('tag', justify='center')
     recent_solves_scrolled_text.tag_add('tag', '0.0', 'end')
     recent_solves_scrolled_text.config(state='disabled')
     recent_solves_scrolled_text.pack()
     # Звук открытия при выключенном бесшумном режиме, затем вызов автоматического закрытия через 200 с.
-    if sounds_on:
+    if Vars.sounds_on:
         ws.PlaySound('sounds/ping.wav', NORMAL_SOUND_PLAY_BREAK)
     win_recent.after(200000, lambda: win_recent.destroy())
 
 
 def check(_event) -> None:
     """Проверяет на правильность ввода и выводит окно ошибки, либо найденные корни.
-    В случае корректного ввода добавляет уравнение и найденные корни в recent_solves_scrolled_text_string."""
+    В случае корректного ввода добавляет уравнение и найденные корни в Vars.recent_solves_scrolled_text_string."""
     # _event необходим для работы из-за нажатия enter (в bind) для решения, без него можно
     # просто назначить command кнопке, как сделано в остальных случаях и не указывать _event.
-    global recent_solves_scrolled_text_string
     main_s = entry_center.get().replace('^', '**').replace(',', '.').replace(' ', '')
     equal_sign = main_s.rfind('=')
     if equal_sign != -1 and main_s[equal_sign:] == '=0':
@@ -126,19 +93,19 @@ def check(_event) -> None:
         button_center.config(image=button_center_default_photo)
     else:
         button_center.config(image=button_center_correct_photo)
-        count_x = final_solve.count('x')
+        solves_count = final_solve.count('x')
         # Операции с Text.
         text_bottom.config(state='normal')
         text_bottom.delete('0.0', 'end')
-        if count_x > 0:
-            if sounds_on:
+        if solves_count > 0:
+            if Vars.sounds_on:
                 ws.PlaySound('sounds/funky.wav', NORMAL_SOUND_PLAY_BREAK)
-            if count_x > 1:
+            if solves_count > 1:
                 text_bottom.insert('0.0', f'Корни вашего уравнения:\n{final_solve}')
             else:
                 text_bottom.insert('0.0', f'Корень вашего уравнения:\n{final_solve}')
         else:
-            if sounds_on:
+            if Vars.sounds_on:
                 ws.PlaySound('sounds/boop.wav', NORMAL_SOUND_PLAY_BREAK)
             text_bottom.insert('1.0', 'Данное уравнение не имеет действительных корней')
         text_bottom.tag_config('tag', justify='center')
@@ -146,16 +113,20 @@ def check(_event) -> None:
         text_bottom.config(state='disabled')
         win_main.after(4000, lambda: button_center.config(image=button_center_default_photo))
         # Добавление решений.
-        recent_solves_scrolled_text_string += f"Решение уравнения:\n{main_s.replace('**', '^')}=0\n⤋\n{final_solve}\n"
+        Vars.recent_solves_scrolled_text_string += (
+            f"Решение уравнения:\n{main_s.replace('**', '^')}=0\n⤋\n{final_solve}\n")
+        # С Python 3.12 возможно использование одинаковых кавычек внутри и снаружи f-string
 
 
 def solve(s_x) -> str:
     """Находит отрезки с корнями."""
     # Здесь eval использует глобальную и локальную
     # области видимости, находя x в локальной.
-    step, x, final_roots = 1, -10000, ''
-    while x <= 10000:
+    step, x, final_roots = 1, -1000, ''
+    while x <= 1000:
         y1 = eval(s_x)
+        if y1 == 0:
+            final_roots += F'x = {x}\n'
         x += step
         y2 = eval(s_x)
         if y1 * y2 < 0:
@@ -181,15 +152,14 @@ def root(s, a, b) -> float:
 
 def turn_off_on_sounds() -> None:
     """Выключает/включает бесшумный режим."""
-    global sounds_on
-    if sounds_on:
+    if Vars.sounds_on:
         ws.PlaySound('sounds/mute.wav', NORMAL_SOUND_PLAY_BREAK)
         button_right2.config(image=button_right2_silent_photo)
-        sounds_on = False
+        Vars.sounds_on = False
     else:
         ws.PlaySound('sounds/unmute.wav', NORMAL_SOUND_PLAY_BREAK)
         button_right2.config(image=button_right2_normal_photo)
-        sounds_on = True
+        Vars.sounds_on = True
 
 
 def hide_temp_text(_event) -> None:
@@ -211,7 +181,7 @@ def show_temp_text(_event) -> None:
 def on_exit() -> None:
     """Выводит диалоговое окно при закрытии главного окна."""
     if mb.askokcancel('Выход из приложения', 'Хотите выйти из приложения?'):
-        if sounds_on:
+        if Vars.sounds_on:
             ws.PlaySound('sounds/balloon.wav', NORMAL_SOUND_PLAY_BREAK)
         win_main.after(850, win_main.destroy())
 
@@ -224,6 +194,9 @@ def neon_gif_update(indx) -> None:
         indx = 0
     label_center.config(image=frame)
     win_main.after(140, neon_gif_update, indx)
+
+
+########################################################################################################################
 
 
 # Главное окно.
@@ -252,7 +225,6 @@ button_right1.grid(row=0, column=2, padx=10, pady=10, sticky='ne')
 
 # Кнопка переключения режимов звука.
 
-sounds_on = True
 button_right2_normal_photo = tk.PhotoImage(file='resources/normal.png')
 button_right2_silent_photo = tk.PhotoImage(file='resources/silent.png')
 button_right2 = tk.Button(win_main, image=button_right2_normal_photo, background='black', command=turn_off_on_sounds,
