@@ -3,7 +3,7 @@
 
 class Variables:
     try:
-        settings = open(R'logs/settings.txt')
+        settings = open('settings.txt')
     except FileNotFoundError:
         frames_delay: str = '500'
         sound_mode: str = 'default'

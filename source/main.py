@@ -162,7 +162,7 @@ def show_temp_entry_value(entry, which_value: str) -> None:
 
 def on_exit() -> None:
     if askokcancel('Выход из приложения', 'Хотите выйти из приложения?'):
-        open(R'logs\settings.txt', 'w').write(F'{Variables.frames_delay}\n{Variables.sound_mode}')
+        open('settings.txt', 'w').write(F'{Variables.frames_delay}\n{Variables.sound_mode}')
         if Variables.sound_mode == 'default':
             PlaySound(R'assets\sounds\exit.wav', NORMAL_PLAYBACK)
         root_window.after(850, root_window.destroy())
