@@ -16,7 +16,7 @@ from myconstants import *
 from variables import Variables
 from equation import raw_to_expr, find_roots, roots_output
 from validation import validate_expr
-from appearance import button_options
+from appearance import button_options, entry_options, label_options, text_options, scale_options
 
 # Составная константа для привычного воспроизведения звуков
 NORMAL_PLAYBACK = SND_FILENAME + SND_ASYNC + SND_NODEFAULT
@@ -36,9 +36,7 @@ def guide() -> None:
     guide_window.resizable(False, False), guide_window.transient(root_window)
     guide_window.protocol('WM_DELETE_WINDOW', on_guide_exit)
 
-    guide_scrolled_text = ScrolledText(guide_window, background=BLACK, font=('Calibri', 11), foreground=PURPLE,
-                                       height=17, relief=tk.SOLID, selectbackground=BLACK,
-                                       selectforeground=TURQUOISE, width=73)
+    guide_scrolled_text = ScrolledText(guide_window, **text_options, font=('Calibri', 11), height=17, width=73)
     guide_scrolled_text.insert('0.0', GUIDE_MESSAGE)
     guide_scrolled_text.tag_configure('center_alignment', justify=tk.CENTER)
     guide_scrolled_text.tag_add('center_alignment', '27.0', tk.END)
@@ -68,13 +66,12 @@ def solved() -> None:
     solved_window.resizable(False, False), solved_window.transient(root_window)
     solved_window.protocol('WM_DELETE_WINDOW', on_solved_exit)
 
-    refresh_button = tk.Button(solved_window, activebackground=BLACK, borderwidth=0, background=BLACK,
-                               command=refresh_solved, cursor='hand2', image=refresh_image)
+    refresh_button = tk.Button(solved_window, **button_options, command=refresh_solved, cursor='hand2',
+                               image=refresh_image)
     refresh_button.grid(row=0, column=0, padx=10, pady=10, sticky=tk.NW)
 
-    solved_scrolled_text = ScrolledText(solved_window, background=BLACK, font=('Calibri', 11), foreground=PURPLE,
-                                        height=17, relief=tk.SOLID, selectbackground=BLACK,
-                                        selectforeground=TURQUOISE, width=67, wrap=tk.WORD)
+    solved_scrolled_text = ScrolledText(solved_window, **text_options, font=('Calibri', 11),
+                                        height=17, width=67, wrap=tk.WORD)
     solved_scrolled_text.insert('0.0', Variables.solved)
     solved_scrolled_text.tag_configure('center_alignment', justify=tk.CENTER)
     solved_scrolled_text.tag_add('center_alignment', '0.0', tk.END)
@@ -103,11 +100,9 @@ def settings() -> None:
     settings_window.resizable(False, False), settings_window.transient(root_window)
     settings_window.protocol('WM_DELETE_WINDOW', on_settings_exit)
 
-    speed_scale = tk.Scale(settings_window, activebackground=BLACK, background=BLACK, borderwidth=0,
-                           command=set_frames_delay, font=('Calibri', 11), foreground=PURPLE, from_=1,
-                           highlightbackground=BLACK, label=38 * ' ' + 'Изменение скорости GIF', length=400,
-                           orient=tk.HORIZONTAL, sliderlength=40, sliderrelief=tk.RIDGE, to=1_000,
-                           troughcolor=GREY)
+    speed_scale = tk.Scale(settings_window, **scale_options, command=set_frames_delay, font=('Calibri', 11), from_=1,
+                           label=38 * ' ' + 'Изменение скорости GIF', length=400, orient=tk.HORIZONTAL,
+                           sliderlength=40, to=1_000)
     speed_scale.set(Variables.frames_delay)
     speed_scale.grid(row=0, column=0, padx=20, pady=10)
 
@@ -147,17 +142,13 @@ def switch_sound_mode() -> None:
 
 
 def hide_temp_entry_value(entry, which_value: str) -> None:
-    entry.configure(state=tk.NORMAL)
     if entry.get() == which_value:
-        entry.configure(foreground=TURQUOISE)
-        entry.delete(0, tk.END)
+        entry.configure(state=tk.NORMAL), entry.delete(0, tk.END)
 
 
 def show_temp_entry_value(entry, which_value: str) -> None:
     if entry.get() == '':
-        entry.configure(foreground=GREY)
-        entry.insert(0, which_value)
-        entry.configure(state=tk.DISABLED)
+        entry.insert(0, which_value), entry.configure(state=tk.DISABLED)
 
 
 def on_exit() -> None:
@@ -220,11 +211,11 @@ root_window.configure(menu=menu_bar)
 # Создание вложенного меню
 file_menu = tk.Menu(tearoff=0)
 
-# Размещение вложенных меню
+# Размещение вложенного меню
 menu_bar.add_cascade(label='Файл', menu=file_menu)
-file_menu.add_command(label='Настройки...', image=settings_image, compound=tk.LEFT, command=settings)
+file_menu.add_command(command=settings, compound=tk.LEFT, image=settings_image, label='Настройки...')
 
-# Кнопка помощи
+# Кнопка инструкции
 guide_button = tk.Button(root_window, **button_options, command=guide, cursor='question_arrow', image=lamp_image)
 guide_button.grid(row=0, column=0, padx=3, sticky=tk.NW)
 
@@ -241,11 +232,9 @@ elif Variables.sound_mode == 'silent':
     sound_mode_button.configure(image=silent_sound_mode_image)
 
 # Поле ввода уравнения
-equation_entry = tk.Entry(root_window, font=('Segoe UI Variable Text Light', 45), width=20, justify=tk.CENTER,
-                          background=BLACK, foreground=GREY, borderwidth=1, cursor='xterm',
-                          selectforeground=GREY, selectbackground=BLACK, disabledbackground=BLACK,
-                          insertbackground=GREY, insertwidth=1)
+equation_entry = tk.Entry(root_window, **entry_options, font=('Segoe UI Variable Text Light', 45), width=20)
 equation_entry.insert(0, 'Введите уравнение...')
+equation_entry.configure(state=tk.DISABLED)
 equation_entry.grid(row=1, column=1, sticky=tk.EW)
 
 # Кнопка решения уравнения
@@ -254,24 +243,23 @@ solve_button = tk.Button(root_window, **button_options, command=analyze_raw, cur
 solve_button.grid(row=2, column=1)
 
 # GIF
-neon_gif_label = tk.Label(root_window, background=BLACK)
+neon_gif_label = tk.Label(root_window, **label_options)
 neon_gif_label.grid(row=3, column=1)
 gif_frames_updater(neon_gif_label, neon_gif_frames)
 
 # Вывод решения уравнения
-solve_text = tk.Text(root_window, width=45, height=4, background=BLACK, foreground=PURPLE,
-                     font=('Segoe UI Variable Text Light', 20), relief=tk.SOLID, selectforeground=TURQUOISE,
-                     selectbackground=BLACK, wrap=tk.WORD)
+solve_text = tk.Text(root_window, **text_options, font=('Segoe UI Variable Text Light', 20),
+                     height=4, width=45, wrap=tk.WORD)
 solve_text.insert('0.0', 'Здесь будут отображаться решения уравнений')
 solve_text.tag_configure('center_alignment', justify=tk.CENTER)
 solve_text.tag_add('center_alignment', '0.0', tk.END)
-solve_text.grid(row=4, column=1)
+solve_text.grid(row=4, column=1, sticky=tk.NS)
 
 # Виджет кривой полосы снизу
-curve_line_label = tk.Label(image=curve_line_image, background=BLACK)
+curve_line_label = tk.Label(root_window, **label_options, image=curve_line_image)
 curve_line_label.grid(row=5, column=1)
 
-# Позволяем всем использующимся колонкам и строкам распределят доп. место поровну при увеличении
+# Позволяем всем использующимся колонкам и строкам распределять дополнительное место поровну при увеличении
 [root_window.columnconfigure(column, weight=1) for column in range(3)]
 [root_window.rowconfigure(row, weight=1) for row in range(1, 6)]
 
@@ -279,10 +267,8 @@ curve_line_label.grid(row=5, column=1)
 equation_entry.bind('<Return>', analyze_raw)
 equation_entry.bind('<Button-1>', lambda event: hide_temp_entry_value(equation_entry, 'Введите уравнение...'))
 equation_entry.bind('<BackSpace>', lambda event: (show_temp_entry_value(equation_entry, 'Введите уравнение...'),
-                                                  refresh_text(solve_text, ''),
-                                                  solve_button.configure(image=solve_button_default_image))
+                    refresh_text(solve_text, ''), solve_button.configure(image=solve_button_default_image))
                     if equation_entry.get() == '' else ...)
 
-# Начало программы. Прорисовка всех виджетов, реагирование на
-# ввод пользователя до тех пор, пока программа не завершится
+# Начало программы
 root_window.mainloop()
