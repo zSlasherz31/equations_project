@@ -232,7 +232,7 @@ elif Variables.sound_mode == 'silent':
     sound_mode_button.configure(image=silent_sound_mode_image)
 
 # Поле ввода уравнения
-equation_entry = tk.Entry(root_window, **entry_options, font=('Segoe UI Variable Text Light', 45), width=20)
+equation_entry = tk.Entry(root_window, **entry_options, font=('Segoe UI Light', 45), width=20)
 equation_entry.insert(0, 'Введите уравнение...')
 equation_entry.configure(state=tk.DISABLED)
 equation_entry.grid(row=1, column=1, sticky=tk.EW)
@@ -248,7 +248,7 @@ neon_gif_label.grid(row=3, column=1)
 gif_frames_updater(neon_gif_label, neon_gif_frames)
 
 # Вывод решения уравнения
-solve_text = tk.Text(root_window, **text_options, font=('Segoe UI Variable Text Light', 20),
+solve_text = tk.Text(root_window, **text_options, font=('Segoe UI Light', 20),
                      height=4, width=45, wrap=tk.WORD)
 solve_text.insert('0.0', 'Здесь будут отображаться решения уравнений')
 solve_text.tag_configure('center_alignment', justify=tk.CENTER)
