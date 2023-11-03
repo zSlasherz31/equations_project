@@ -119,10 +119,10 @@ def analyze_raw(_event=None) -> None:
         refresh_text(solve_text, solve, ('center_alignment',))
         # Если включено звуковое сопровождение, воспроизвести звук
         if Variables.sound_mode == 'default':
-            PlaySound(FR'assets\sounds\{'roots' if solve.count('x') else 'no_roots'}.wav', NORMAL_PLAYBACK)
+            PlaySound(FR'assets\sounds\{"roots" if solve.count("x") else "no_roots"}.wav', NORMAL_PLAYBACK)
         solve_button.after(2000, lambda: solve_button.configure(image=solve_button_default_image))
         # Добавить текущее решение в недавно решённые
-        Variables.solved += F'⤥      {raw + (' = 0' if '=' not in raw else '')}      ⤦\n{solve}\n\n\n'
+        Variables.solved += F'⤥      {raw + (" = 0" if "=" not in raw else "")}      ⤦\n{solve}\n\n\n'
     else:
         refresh_text(solve_text, '')
         solve_button.configure(image=solve_button_incorrect_image)
