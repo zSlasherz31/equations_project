@@ -2,14 +2,9 @@
 
 
 class Variables:
-    try:
-        settings = open('settings.txt')
-    except FileNotFoundError:
-        frames_delay: str = '500'
-        sound_mode: str = 'default'
-    else:
-        frames_delay, sound_mode = (setting.strip() for setting in settings)
-        settings.close()
+    with open('settings.txt') as settings:
+        frames_delay: int = int(next(settings))
+        sound_mode: str = next(settings)
     solved: str = 'Недавно решённые.\n\n'
 
 
