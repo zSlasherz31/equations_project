@@ -5,14 +5,17 @@
 def raw_to_expr(raw: str) -> str:
     # Первоначальные преобразования (согласно требованиям ввода для юзера)
     raw = raw.replace(' ', '').replace(',', '.').replace('^', '**')
-    # Убрать приравнивание к 0 (если есть)
-    eqs_indx = raw.find('=')
-    expr = raw[:eqs_indx] if eqs_indx != -1 else raw
+    # Убрать приравнивание к 0, если есть (согласно требованиям оно должно быть)
+    eq_indx = raw.find('=0')
+    expr = raw + '`' if eq_indx == -1 else raw[:eq_indx] + ' ' + raw[eq_indx + 2:]
     return expr
 
 
 # Нахождение корней по корректному выражению
-def find_roots(valid_expr: str, *, from_x: int = -100, to_x: int = 100, eps: float = 1e-10) -> tuple[int | float, ...]:
+def find_roots(valid_expr: str, *,
+               from_x: int = -100,
+               to_x: int = 100,
+               eps: float = 1e-10) -> tuple[int | float, ...]:
     # Чем меньше эпсилон, тем точнее нецелый корень (но в зависимости от уравнения
     # возможно вычислить такой корень только до определенного эпсилона)
     roots = ()  # корни всегда в порядке возрастания
@@ -92,8 +95,5 @@ def roots_output(roots: tuple, *, prec: int = 5) -> str:
 
     return output
 
-
-if __name__ == '__main__':
-    print(roots_output(find_roots(raw_to_expr('3 ^ 8 * x ^ 3 + 2 * x ^ 2 + 12.5'))))
 
 __all__ = ['raw_to_expr', 'find_roots', 'roots_output']

@@ -39,7 +39,7 @@ def guide() -> None:
     guide_scrolled_text = ScrolledText(guide_window, **text_options, font=('Calibri', 11), height=17, width=73)
     guide_scrolled_text.insert('0.0', GUIDE_MESSAGE)
     guide_scrolled_text.tag_configure('center_alignment', justify=tk.CENTER)
-    guide_scrolled_text.tag_add('center_alignment', '27.0', tk.END)
+    guide_scrolled_text.tag_add('center_alignment', '25.0', tk.END)
     guide_scrolled_text.configure(state=tk.DISABLED)
     guide_scrolled_text.grid(row=0, column=0)
 
@@ -122,7 +122,7 @@ def analyze_raw(_event=None) -> None:
             PlaySound(FR'assets\sounds\{"roots" if solve.count("x") else "no_roots"}.wav', NORMAL_PLAYBACK)
         solve_button.after(2000, lambda: solve_button.configure(image=solve_button_default_image))
         # Добавить текущее решение в недавно решённые
-        Variables.solved += F'⤥      {raw + (" = 0" if "=" not in raw else "")}      ⤦\n{solve}\n\n\n'
+        Variables.solved += F'⤥      {raw}      ⤦\n{solve}\n\n\n'
     else:
         refresh_text(solve_text, '')
         solve_button.configure(image=solve_button_incorrect_image)
